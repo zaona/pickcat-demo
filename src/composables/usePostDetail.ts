@@ -19,6 +19,7 @@ import {
   togglePostLike,
 } from '@/services/postService'
 import { fetchUserById } from '@/services/userService'
+import { useAppScroll } from '@/composables/useAppScroll'
 import { useAuthStore } from '@/stores/auth'
 import type { Category, Comment, FeedSort, Post, User } from '@/types'
 
@@ -43,6 +44,7 @@ export const commentSortOptions: { label: string; value: FeedSort }[] = [
 export function usePostDetail(postId: () => string) {
   const toast = useToast()
   const auth = useAuthStore()
+  const { scrollToElement } = useAppScroll()
 
   const loading = ref(true)
   const submitting = ref(false)
@@ -266,10 +268,10 @@ export function usePostDetail(postId: () => string) {
       rootId,
       displayName: node.author?.displayName ?? '未知用户',
     }
-    document.getElementById('comment-composer')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    })
+    const composer = document.getElementById('comment-composer')
+    if (composer) {
+      scrollToElement(composer, { block: 'center', speed: 300 })
+    }
   }
 
   function cancelReply() {

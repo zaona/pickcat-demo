@@ -3,13 +3,14 @@
  * 首页
  *
  * - 桌面：标题通栏，下方帖子列表与右侧分类侧栏（发帖在分类上方）
- * - 移动端：横向分类 + 排序 + 信息流
+ * - 移动端：横向分类（vuescroll）+ 排序 + 信息流
  */
 import { useRouter } from 'vue-router'
 
 import PostListItem from '@/components/PostListItem.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import { feedSortOptions, usePostFeed } from '@/composables/usePostFeed'
+import { horizontalScrollOps } from '@/plugins/vuescroll'
 
 const router = useRouter()
 
@@ -39,20 +40,31 @@ function goCreate() {
     </header>
 
     <div class="mobile-only mobile-feed-filters">
-      <div class="mobile-category-scroll" role="tablist" aria-label="分类">
-        <button
-          v-for="option in categoryOptions"
-          :key="String(option.value)"
-          type="button"
-          role="tab"
-          class="mobile-category-chip"
-          :class="{ 'is-active': selectedCategoryId === option.value }"
-          :aria-selected="selectedCategoryId === option.value"
-          @click="selectedCategoryId = option.value"
+      <div class="mobile-category-scroll-host">
+        <vue-scroll
+          class="mobile-category-scroll"
+          :ops="horizontalScrollOps"
         >
-          <AppIcon :name="option.icon" :size="16" />
-          <span>{{ option.label }}</span>
-        </button>
+          <div
+            class="mobile-category-row"
+            role="tablist"
+            aria-label="分类"
+          >
+            <button
+              v-for="option in categoryOptions"
+              :key="String(option.value)"
+              type="button"
+              role="tab"
+              class="mobile-category-chip"
+              :class="{ 'is-active': selectedCategoryId === option.value }"
+              :aria-selected="selectedCategoryId === option.value"
+              @click="selectedCategoryId = option.value"
+            >
+              <AppIcon :name="option.icon" :size="16" />
+              <span>{{ option.label }}</span>
+            </button>
+          </div>
+        </vue-scroll>
       </div>
       <SelectButton
         v-model="sort"
@@ -196,19 +208,23 @@ function goCreate() {
   }
 }
 
-/* 移动端：分类横向滚动 */
-.mobile-category-scroll {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  margin-inline: -0.15rem;
-  padding-inline: 0.15rem;
+/* 移动端：分类横向滚动（vuescroll） */
+.mobile-category-scroll-host {
+  width: 100%;
+  height: 2.75rem;
 }
 
-.mobile-category-scroll::-webkit-scrollbar {
-  display: none;
+.mobile-category-scroll {
+  width: 100%;
+  height: 100%;
+}
+
+.mobile-category-row {
+  display: inline-flex;
+  gap: 0.5rem;
+  padding-inline: 0.15rem;
+  min-height: 2.75rem;
+  align-items: center;
 }
 
 .mobile-category-chip {

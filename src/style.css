@@ -15,7 +15,8 @@ html,
 body,
 #app {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -29,6 +30,20 @@ body {
   --gap-card: 0.75rem;
   /* 区块 / 主栏大间距 */
   --gap-section: 1.25rem;
+}
+
+/* 布局根：顶/底栏固定占位，中间由 vuescroll 接管滚动 */
+.layout-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.layout-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
 }
 
 a {
@@ -62,8 +77,8 @@ a {
   width: 12rem;
   flex-shrink: 0;
   position: sticky;
-  /* 避开常驻顶栏 */
-  top: 5rem;
+  /* 顶栏已在滚动区外，侧栏贴近滚动视口顶部即可 */
+  top: 1rem;
 }
 
 .home-main {
@@ -157,11 +172,10 @@ a {
   display: block;
 }
 
-/* 桌面顶栏常驻：仅下描边 + 毛玻璃
+/* 桌面顶栏常驻：仅下描边 + 毛玻璃（置于 layout 外，不再 sticky）
  * 注意：勿写多段 filter 函数（如 saturate() blur()），部分 CSS 压缩器会去掉空格导致整段失效 */
 .desktop-topbar-host {
-  position: sticky;
-  top: 0;
+  flex: 0 0 auto;
   z-index: 60;
   background: color-mix(in srgb, var(--p-content-background) 72%, transparent);
   -webkit-backdrop-filter: blur(14px);
@@ -192,7 +206,7 @@ a {
     width: 20rem;
     flex-shrink: 0;
     position: sticky;
-    top: 5rem;
+    top: 1rem;
   }
 
   .post-layout {
@@ -204,7 +218,7 @@ a {
     width: 16rem;
     flex-shrink: 0;
     position: sticky;
-    top: 5rem;
+    top: 1rem;
   }
 
   .desktop-only.post-aside {
@@ -227,10 +241,7 @@ a {
   }
 
   .mobile-topbar-host {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    flex: 0 0 auto;
     z-index: 60;
     background: color-mix(in srgb, var(--p-content-background) 72%, transparent);
     -webkit-backdrop-filter: blur(14px);
@@ -248,10 +259,7 @@ a {
   }
 
   .mobile-bottom-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    flex: 0 0 auto;
     z-index: 60;
     background: color-mix(in srgb, var(--p-content-background) 72%, transparent);
     -webkit-backdrop-filter: blur(14px);
@@ -358,11 +366,11 @@ a {
   }
 
   /*
-   * 移动端内容区边距：避开 fixed 顶/底栏（高度与 --mobile-bar-height 对齐）
+   * 移动端内容区：顶/底栏已在 flex 占位，无需再为 fixed 栏加额外 padding
    */
   .page-container {
-    padding-top: 5.5rem;
-    padding-bottom: 5.5rem;
+    padding-top: 1.25rem;
+    padding-bottom: 1.5rem;
   }
 
   /* 移动端不显示页面级大标题（帖子正文标题除外） */

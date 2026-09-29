@@ -32,8 +32,10 @@ const mingcuteIcons = [
   '@mingcute/vue/core-filled/add',
   '@mingcute/vue/core-filled/bookmark',
   '@mingcute/vue/core-filled/entrance',
+  '@mingcute/vue/core-filled/grid',
   '@mingcute/vue/core-filled/heart',
   '@mingcute/vue/core-filled/home-1',
+  '@mingcute/vue/core-filled/notification',
   '@mingcute/vue/core-filled/user-2',
 ]
 

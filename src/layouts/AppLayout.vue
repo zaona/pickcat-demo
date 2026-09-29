@@ -3,16 +3,22 @@
  * 应用布局
  *
  * - 桌面：顶栏 Menubar（搜索、消息、用户菜单）
- * - 移动端：顶栏（搜索 + 消息）+ 底部 TabMenu（首页 / 发帖 / 我的）
+ * - 移动端：顶栏（搜索）+ 底部 TabMenu（首页 / 分区 / 发帖 / 消息 / 我的）
+ * - 主内容区使用 vuescroll，替换原生页面滚动
  */
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { MenuItem } from 'primevue/menuitem'
 import type Menu from 'primevue/menu'
 
 import AppIcon from '@/components/AppIcon.vue'
-import { iconFilledMap, type IconName } from '@/icons/registry'
+import {
+  type AppScrollInstance,
+  useAppScroll,
+} from '@/composables/useAppScroll'
 import { useUnreadNotifications } from '@/composables/useUnreadNotifications'
+import { iconFilledMap, type IconName } from '@/icons/registry'
+import { appScrollOps } from '@/plugins/vuescroll'
 import { useAuthStore } from '@/stores/auth'
 
 type AppMenuItem = MenuItem & { iconName?: IconName }
@@ -21,8 +27,21 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const { unreadCount, refreshUnread } = useUnreadNotifications()
+const { setAppScroll, scrollToTop } = useAppScroll()
 
 const userMenu = ref<InstanceType<typeof Menu> | null>(null)
+const layoutScroll = ref<AppScrollInstance | null>(null)
+
+function bindLayoutScroll(instance: unknown) {
+  const scroll = (instance as AppScrollInstance | null) ?? null
+  layoutScroll.value = scroll
+  setAppScroll(scroll)
+}
+
+onBeforeUnmount(() => {
+  setAppScroll(null)
+})
+
 
 const desktopItems = computed(() => [
   {
@@ -61,10 +80,21 @@ const mobileItems = computed<AppMenuItem[]>(() => [
     command: () => router.push({ name: 'home' }),
   },
   {
+    label: '分区',
+    iconName: 'grid',
+    command: () => router.push({ name: 'categories' }),
+  },
+  {
     label: '发帖',
     iconName: 'plus',
     class: 'mobile-compose-item',
     command: () => router.push({ name: 'post-create' }),
+  },
+  {
+    label: '消息',
+    iconName: 'bell',
+    class: 'mobile-messages-item',
+    command: () => router.push({ name: 'notifications' }),
   },
   {
     label: auth.currentUser ? '我的' : '登录',
@@ -82,8 +112,10 @@ const mobileItems = computed<AppMenuItem[]>(() => [
 const mobileActiveIndex = computed(() => {
   const name = route.name
   if (name === 'home' || name === 'post-detail' || name === 'search') return 0
-  if (name === 'post-create') return 1
-  if (name === 'login' || name === 'user' || name === 'bookmarks') return 2
+  if (name === 'categories' || name === 'category') return 1
+  if (name === 'post-create') return 2
+  if (name === 'notifications') return 3
+  if (name === 'login' || name === 'user' || name === 'bookmarks') return 4
   return 0
 })
 
@@ -126,6 +158,15 @@ watch(
   () => route.name,
   (name) => {
     if (name === 'notifications') void refreshUnread()
+  },
+)
+
+watch(
+  () => route.fullPath,
+  async () => {
+    await nextTick()
+    scrollToTop(0)
+    layoutScroll.value?.refresh()
   },
 )
 </script>
@@ -239,40 +280,43 @@ watch(
                 <AppIcon name="search" :class="iconClass" :size="24" />
               </template>
             </Button>
-            <span class="nav-bell">
-              <Button
-                text
-                rounded
-                class="nav-icon-btn"
-                aria-label="消息中心"
-                @click="goNotifications"
-              >
-                <template #icon="{ class: iconClass }">
-                  <AppIcon name="bell" :class="iconClass" :size="24" />
-                </template>
-              </Button>
-              <Badge
-                v-if="auth.currentUser && unreadCount > 0"
-                :value="unreadLabel"
-                severity="danger"
-                class="nav-bell-badge"
-              />
-            </span>
           </div>
         </template>
       </Toolbar>
     </div>
 
-    <main class="page-container">
-      <RouterView />
-    </main>
+    <vue-scroll
+      :ref="bindLayoutScroll"
+      class="layout-scroll"
+      :ops="appScrollOps"
+    >
+      <main class="page-container">
+        <RouterView />
+      </main>
+    </vue-scroll>
 
     <nav class="mobile-only mobile-bottom-nav" aria-label="主导航">
       <TabMenu :model="mobileItems" :active-index="mobileActiveIndex">
         <template #itemicon="{ item, class: iconClass }">
           <!-- 类名挂在容器上：发帖钮的彩色方块与字形尺寸分离；选中用 Filled -->
-          <span v-if="mobileNavIconName(item)" :class="iconClass">
+          <span
+            v-if="mobileNavIconName(item)"
+            :class="[
+              iconClass,
+              menuIconName(item) === 'bell' ? 'nav-bell' : undefined,
+            ]"
+          >
             <AppIcon :name="mobileNavIconName(item)!" :size="22" />
+            <Badge
+              v-if="
+                menuIconName(item) === 'bell' &&
+                auth.currentUser &&
+                unreadCount > 0
+              "
+              :value="unreadLabel"
+              severity="danger"
+              class="nav-bell-badge mobile-nav-bell-badge"
+            />
           </span>
         </template>
       </TabMenu>
@@ -339,5 +383,11 @@ watch(
   line-height: 1rem;
   padding: 0 0.25rem;
   pointer-events: none;
+}
+
+/* 底栏消息角标：贴在较小图标右上 */
+.mobile-nav-bell-badge {
+  top: -0.2rem;
+  right: -0.35rem;
 }
 </style>

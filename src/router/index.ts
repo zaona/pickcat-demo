@@ -19,6 +19,18 @@ export const router = createRouter({
           meta: { title: '首页' },
         },
         {
+          path: 'categories',
+          name: 'categories',
+          component: () => import('@/views/CategoriesView.vue'),
+          meta: { title: '分区' },
+        },
+        {
+          path: 'categories/:id',
+          name: 'category',
+          component: () => import('@/views/CategoryDetailView.vue'),
+          meta: { title: '分区' },
+        },
+        {
           path: 'search',
           name: 'search',
           component: () => import('@/views/SearchView.vue'),
@@ -64,7 +76,8 @@ export const router = createRouter({
     },
   ],
   scrollBehavior() {
-    return { top: 0 }
+    // 页面滚动由 AppLayout 内 vuescroll 接管
+    return false
   },
 })
 

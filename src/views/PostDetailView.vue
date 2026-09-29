@@ -10,6 +10,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import CommentThread from '@/components/CommentThread.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import { useAppScroll } from '@/composables/useAppScroll'
 import { commentSortOptions, usePostDetail } from '@/composables/usePostDetail'
 
 interface TocItem {
@@ -19,6 +20,7 @@ interface TocItem {
 
 const route = useRoute()
 const router = useRouter()
+const { scrollToElement } = useAppScroll()
 
 const postId = computed(() => String(route.params.id ?? ''))
 
@@ -89,7 +91,7 @@ function scrollToSection(id: string) {
   if (!el) return
   const active = document.activeElement
   if (active instanceof HTMLElement) active.blur()
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  scrollToElement(el, { block: 'start', offset: 12, speed: 300 })
 }
 </script>
 
@@ -448,7 +450,7 @@ function scrollToSection(id: string) {
 /* 避开常驻顶栏，锚点跳转不被遮挡 */
 .content-block,
 #post-comments {
-  scroll-margin-top: 5rem;
+  scroll-margin-top: 1rem;
 }
 
 .content-block {

@@ -34,8 +34,10 @@ import UserRemoveRegular from '@mingcute/vue/core-regular/user-remove'
 import AddFilled from '@mingcute/vue/core-filled/add'
 import BookmarkFilled from '@mingcute/vue/core-filled/bookmark'
 import EntranceFilled from '@mingcute/vue/core-filled/entrance'
+import GridFilled from '@mingcute/vue/core-filled/grid'
 import HeartFilled from '@mingcute/vue/core-filled/heart'
 import Home1Filled from '@mingcute/vue/core-filled/home-1'
+import NotificationFilled from '@mingcute/vue/core-filled/notification'
 import User2Filled from '@mingcute/vue/core-filled/user-2'
 
 import type { IconProps } from '@mingcute/vue'
@@ -45,6 +47,7 @@ export type IconName =
   | 'homeFilled'
   | 'search'
   | 'bell'
+  | 'bellFilled'
   | 'user'
   | 'userFilled'
   | 'userAdd'
@@ -69,6 +72,7 @@ export type IconName =
   | 'info'
   | 'chevronDown'
   | 'grid'
+  | 'gridFilled'
   | 'code'
   | 'book'
   | 'briefcase'
@@ -77,10 +81,12 @@ export type IconName =
 export const iconFilledMap: Partial<Record<IconName, IconName>> = {
   home: 'homeFilled',
   plus: 'plusFilled',
+  bell: 'bellFilled',
   user: 'userFilled',
   signIn: 'signInFilled',
   heart: 'heartFilled',
   bookmark: 'bookmarkFilled',
+  grid: 'gridFilled',
 }
 
 type IconComponent = FunctionalComponent<IconProps>
@@ -90,6 +96,7 @@ export const iconRegistry: Record<IconName, IconComponent> = {
   homeFilled: Home1Filled,
   search: Search2Regular,
   bell: NotificationRegular,
+  bellFilled: NotificationFilled,
   user: User2Regular,
   userFilled: User2Filled,
   userAdd: UserAddRegular,
@@ -114,6 +121,7 @@ export const iconRegistry: Record<IconName, IconComponent> = {
   info: InformationRegular,
   chevronDown: DownRegular,
   grid: GridRegular,
+  gridFilled: GridFilled,
   code: CodeRegular,
   book: Book2Regular,
   briefcase: BriefcaseRegular,

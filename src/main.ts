@@ -9,6 +9,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { mockStore } from './mocks/store'
 import { setupPrimeVue } from './plugins/primevue'
+import { setupVuescroll } from './plugins/vuescroll'
 import { router } from './router'
 import { useAuthStore } from './stores/auth'
 import './style.css'
@@ -24,5 +25,6 @@ auth.setUserResolver((id) => mockStore.getUser(id))
 
 app.use(router)
 setupPrimeVue(app)
+setupVuescroll(app)
 
 app.mount('#app')

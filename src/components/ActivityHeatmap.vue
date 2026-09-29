@@ -5,6 +5,7 @@
 import { computed } from 'vue'
 
 import type { HeatmapDay } from '@/types'
+import { horizontalScrollOps } from '@/plugins/vuescroll'
 
 const props = defineProps<{
   days: HeatmapDay[]
@@ -42,20 +43,22 @@ function tip(day: HeatmapDay) {
 
 <template>
   <div class="heatmap">
-    <div class="heatmap-scroll">
-      <div class="heatmap-grid" role="img" aria-label="近一年活跃热力图">
-        <div v-for="(week, wi) in weeks" :key="wi" class="heatmap-week">
-          <span
-            v-for="(day, di) in week"
-            :key="`${wi}-${di}`"
-            class="heatmap-cell"
-            :class="[
-              day.count < 0 ? 'is-pad' : `lv-${level(day.count)}`,
-            ]"
-            :title="tip(day)"
-          />
+    <div class="heatmap-scroll-host">
+      <vue-scroll class="heatmap-scroll" :ops="horizontalScrollOps">
+        <div class="heatmap-grid" role="img" aria-label="近一年活跃热力图">
+          <div v-for="(week, wi) in weeks" :key="wi" class="heatmap-week">
+            <span
+              v-for="(day, di) in week"
+              :key="`${wi}-${di}`"
+              class="heatmap-cell"
+              :class="[
+                day.count < 0 ? 'is-pad' : `lv-${level(day.count)}`,
+              ]"
+              :title="tip(day)"
+            />
+          </div>
         </div>
-      </div>
+      </vue-scroll>
     </div>
     <div class="heatmap-legend muted">
       <span>少</span>
@@ -76,15 +79,21 @@ function tip(day: HeatmapDay) {
   gap: 0.5rem;
 }
 
+.heatmap-scroll-host {
+  width: 100%;
+  height: 5.75rem;
+}
+
 .heatmap-scroll {
-  overflow-x: auto;
-  padding-bottom: 0.15rem;
+  width: 100%;
+  height: 100%;
 }
 
 .heatmap-grid {
   display: inline-flex;
   gap: 3px;
   min-height: 5.5rem;
+  padding-bottom: 0.15rem;
 }
 
 .heatmap-week {

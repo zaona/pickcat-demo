@@ -1,10 +1,10 @@
 /**
- * 首页信息流组合逻辑
+ * 首页 / 分区信息流组合逻辑
  *
  * 负责：分类筛选、最新/最热排序、分页、加载帖子与关联的用户/分类映射。
  * 关键词搜索已独立到搜索页。
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, toValue, watch, type MaybeRefOrGetter } from 'vue'
 
 import { fetchCategories } from '@/services/categoryService'
 import { fetchPosts } from '@/services/postService'
@@ -17,7 +17,10 @@ export const feedSortOptions: { label: string; value: FeedSort }[] = [
   { label: '最热', value: 'hot' },
 ]
 
-export function usePostFeed() {
+export function usePostFeed(options?: {
+  /** 固定分区 id（分区详情页）；传入后筛选锁定为该分区 */
+  categoryId?: MaybeRefOrGetter<string | null | undefined>
+}) {
   const loading = ref(true)
   const posts = ref<Post[]>([])
   const total = ref(0)
@@ -27,8 +30,23 @@ export function usePostFeed() {
   const categories = ref<Category[]>([])
   const users = ref<User[]>([])
 
+  const lockedCategoryId = computed(() => {
+    if (!options?.categoryId) return undefined
+    return toValue(options.categoryId)
+  })
+
   const selectedCategoryId = ref<string | null>(null)
   const sort = ref<FeedSort>('latest')
+
+  watch(
+    lockedCategoryId,
+    (id) => {
+      if (id !== undefined) {
+        selectedCategoryId.value = id
+      }
+    },
+    { immediate: true },
+  )
 
   const categoryOptions = computed(() => [
     {
